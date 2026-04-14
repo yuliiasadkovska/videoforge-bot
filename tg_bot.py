@@ -30,8 +30,13 @@ import requests
 import telebot  # pip install pyTelegramBotAPI
 from dotenv import load_dotenv
 
-# ✨ Claude Code integration
-from claude_module import register_claude_commands
+# ✨ Claude Code integration (only on local PC, not Railway)
+try:
+    from claude_module import register_claude_commands
+    CLAUDE_AVAILABLE = True
+except ImportError:
+    CLAUDE_AVAILABLE = False
+    log.warning("claude_module not available - Claude commands disabled")
 
 # ── Bootstrap ─────────────────────────────────────────────────────────────────
 
@@ -55,9 +60,13 @@ if not TOKEN:
 
 bot = telebot.TeleBot(TOKEN, parse_mode="Markdown")
 
-# ✨ Register Claude commands
-claude_ui = register_claude_commands(bot, lambda m: _auth(m))
-log.info("Claude Code commands registered")
+# ✨ Register Claude commands (if available)
+if CLAUDE_AVAILABLE:
+    claude_ui = register_claude_commands(bot, lambda m: _auth(m))
+    log.info("Claude Code commands registered")
+else:
+    claude_ui = None
+    log.info("Claude Code commands not available (Railway mode)")
 
 # ── Process tracking ──────────────────────────────────────────────────────────
 
@@ -184,9 +193,10 @@ def _keyboard() -> telebot.types.ReplyKeyboardMarkup:
     kb.row(BTN_URL, BTN_STATUS)
     kb.row(BTN_LAUNCH)
     kb.row(BTN_RESTART, BTN_NGROK)
-    # ✨ Claude Code buttons
-    kb.row("🧠 Claude Sonnet", "💎 Claude Opus")
-    kb.row("🗑️ Очистити історію", "💰 Токени Opus")
+    # ✨ Claude Code buttons (only on local PC)
+    if CLAUDE_AVAILABLE:
+        kb.row("🧠 Claude Sonnet", "💎 Claude Opus")
+        kb.row("🗑️ Очистити історію", "💰 Токени Opus")
     return kb
 
 def _reply(message: telebot.types.Message, text: str) -> None:
@@ -346,21 +356,22 @@ def _do_starttunnel(chat_id: int) -> None:
 
 # ── Claude Code button handlers ───────────────────────────────────────────────
 
-@bot.message_handler(func=lambda m: m.text == "🧠 Claude Sonnet")
-def btn_claude_sonnet(message: telebot.types.Message) -> None:
-    claude_ui["handlers"]["🧠 Claude Sonnet"](message)
+if CLAUDE_AVAILABLE:
+    @bot.message_handler(func=lambda m: m.text == "🧠 Claude Sonnet")
+    def btn_claude_sonnet(message: telebot.types.Message) -> None:
+        claude_ui["handlers"]["🧠 Claude Sonnet"](message)
 
-@bot.message_handler(func=lambda m: m.text == "💎 Claude Opus")
-def btn_claude_opus(message: telebot.types.Message) -> None:
-    claude_ui["handlers"]["💎 Claude Opus"](message)
+    @bot.message_handler(func=lambda m: m.text == "💎 Claude Opus")
+    def btn_claude_opus(message: telebot.types.Message) -> None:
+        claude_ui["handlers"]["💎 Claude Opus"](message)
 
-@bot.message_handler(func=lambda m: m.text == "🗑️ Очистити історію")
-def btn_claude_clear(message: telebot.types.Message) -> None:
-    claude_ui["handlers"]["🗑️ Очистити історію"](message)
+    @bot.message_handler(func=lambda m: m.text == "🗑️ Очистити історію")
+    def btn_claude_clear(message: telebot.types.Message) -> None:
+        claude_ui["handlers"]["🗑️ Очистити історію"](message)
 
-@bot.message_handler(func=lambda m: m.text == "💰 Токени Opus")
-def btn_claude_quota(message: telebot.types.Message) -> None:
-    claude_ui["handlers"]["💰 Токени Opus"](message)
+    @bot.message_handler(func=lambda m: m.text == "💰 Токени Opus")
+    def btn_claude_quota(message: telebot.types.Message) -> None:
+        claude_ui["handlers"]["💰 Токени Opus"](message)
 
 
 # ── AI Team 777 extension (handlers registered in ai_team.py) ─────────────────
