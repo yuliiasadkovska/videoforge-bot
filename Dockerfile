@@ -10,7 +10,7 @@ RUN pip install --no-cache-dir -r requirements_railway.txt
 COPY tg_bot.py .
 COPY tunnel_utils.py .
 COPY ai_team.py .
-COPY .env .
+# Note: .env is not needed on Railway - environment variables are injected via Railway Variables
 
 # Run bot
 CMD ["python", "tg_bot.py"]
