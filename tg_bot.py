@@ -36,7 +36,7 @@ ROOT = Path(__file__).parent
 load_dotenv(ROOT / ".env")
 
 handler = logging.StreamHandler(
-    open(sys.stdout.fileno(), mode="w", encoding="utf-8, buffering=1, closefd=False)
+    open(sys.stdout.fileno(), mode="w", encoding="utf-8", buffering=1, closefd=False)
 )
 handler.setFormatter(logging.Formatter("%(asctime)s  %(levelname)-8s  %(message)s"))
 logging.basicConfig(level=logging.INFO, handlers=[handler])
