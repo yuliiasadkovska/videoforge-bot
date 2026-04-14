@@ -20,16 +20,17 @@ def register_claude_commands(bot, auth_func=None):
     Returns dict with handlers for button integration.
     """
 
-    def _send_webhook(script_name: str, chat_id: int) -> dict:
+    def _send_webhook(model: str, chat_id: int) -> dict:
         """Send webhook to PC Agent to launch Claude script."""
         if not PC_AGENT_URL:
             return {"ok": False, "error": "PC_AGENT_URL not configured"}
 
         try:
             response = requests.post(
-                f"{PC_AGENT_URL}/launch",
+                f"{PC_AGENT_URL}/webhook/claude/launch",
                 json={
-                    "script": script_name,
+                    "model": model,
+                    "user_id": chat_id,
                     "secret": PC_AGENT_SECRET
                 },
                 timeout=10
@@ -50,7 +51,7 @@ def register_claude_commands(bot, auth_func=None):
 
         bot.reply_to(message, "🧠 Запускаю Claude Sonnet на твоєму ПК...")
 
-        result = _send_webhook("sonnet.ps1", message.chat.id)
+        result = _send_webhook("sonnet", message.chat.id)
 
         if result["ok"]:
             bot.reply_to(message, "✅ Claude Sonnet запущено!")
@@ -64,7 +65,7 @@ def register_claude_commands(bot, auth_func=None):
 
         bot.reply_to(message, "💎 Запускаю Claude Opus на твоєму ПК...")
 
-        result = _send_webhook("opus_proxy.ps1", message.chat.id)
+        result = _send_webhook("opus", message.chat.id)
 
         if result["ok"]:
             bot.reply_to(message, "✅ Claude Opus запущено!")
