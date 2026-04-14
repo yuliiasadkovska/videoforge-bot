@@ -375,7 +375,11 @@ if CLAUDE_AVAILABLE:
 
 
 # ── AI Team 777 extension (handlers registered in ai_team.py) ─────────────────
-import ai_team  # noqa: F401  — must stay here so VideoForge handlers register first
+try:
+    import ai_team  # noqa: F401  — must stay here so VideoForge handlers register first
+    log.info("AI Team 777 extension loaded")
+except ImportError as e:
+    log.warning(f"AI Team 777 not available: {e}")
 
 # ── Entry point ───────────────────────────────────────────────────────────────
 
