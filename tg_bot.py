@@ -30,6 +30,18 @@ import requests
 import telebot  # pip install pyTelegramBotAPI
 from dotenv import load_dotenv
 
+# ── Bootstrap ─────────────────────────────────────────────────────────────────
+
+ROOT = Path(__file__).parent
+load_dotenv(ROOT / ".env")
+
+handler = logging.StreamHandler(
+    open(sys.stdout.fileno(), mode="w", encoding="utf-8, buffering=1, closefd=False)
+)
+handler.setFormatter(logging.Formatter("%(asctime)s  %(levelname)-8s  %(message)s"))
+logging.basicConfig(level=logging.INFO, handlers=[handler])
+log = logging.getLogger("tg_bot")
+
 # ✨ Claude Code integration (only on local PC, not Railway)
 try:
     from claude_module import register_claude_commands
@@ -37,18 +49,6 @@ try:
 except ImportError:
     CLAUDE_AVAILABLE = False
     log.warning("claude_module not available - Claude commands disabled")
-
-# ── Bootstrap ─────────────────────────────────────────────────────────────────
-
-ROOT = Path(__file__).parent
-load_dotenv(ROOT / ".env")
-
-handler = logging.StreamHandler(
-    open(sys.stdout.fileno(), mode="w", encoding="utf-8", buffering=1, closefd=False)
-)
-handler.setFormatter(logging.Formatter("%(asctime)s  %(levelname)-8s  %(message)s"))
-logging.basicConfig(level=logging.INFO, handlers=[handler])
-log = logging.getLogger("tg_bot")
 
 TOKEN      = os.getenv("TG_BOT_TOKEN", "").strip()
 ALLOWED_ID = int(os.getenv("TG_ALLOWED_CHAT_ID", "0"))
